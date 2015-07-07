@@ -2,16 +2,19 @@
 #fuse settings are hard-coded into the bottom lines; change them only with care.
 
 PRG            = mivuuauad
-OBJ            = mivuuauad.o
-MCU_TARGET     = attiny2313
+SRC            = uart.c adc.c shift.c mivuuauad.c
+OBJ            = ${SRC:.c=.o}
+MCU_TARGET     = atmega8
 PROGRAMMER     = usbasp
-AVRDUDE_TARGET = t2313
+AVRDUDE_TARGET = atmega8
 PORT           = usb
+F_CPU          = 16000000
+BAUD           = 38400
 
 OPTIMIZE       = -Os -std=c99
 
 DEFS           =
-LIBS           = lcd-routines.c
+LIBS           = uart.c
 
 
 # You should not have to change anything below here.
@@ -20,7 +23,7 @@ CC             = avr-gcc
 
 # Override is only needed by avr-lib build system.
 
-override CFLAGS        = -g -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+override CFLAGS        = -g -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) -DF_CPU=$(F_CPU) -DBAUD=$(BAUD)
 override LDFLAGS       = -Wl,-Map,$(PRG).map
 
 OBJCOPY        = avr-objcopy
@@ -28,8 +31,14 @@ OBJDUMP        = avr-objdump
 
 all: $(PRG).elf lst text eeprom
 
+.c.o:
+	@echo " ** "$(CC) $(CFLAGS) $<
+	@$(CC) -c $(CFLAGS) $<
+
 $(PRG).elf: $(OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
+	@#$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
+	@#$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
+	@$(CC) -o $@ $(OBJ) $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.png *.pdf *.bak *.hex *.bin *.srec
