@@ -1,21 +1,25 @@
 #include <avr/io.h> 
 #include "shift.h"
+#include <util/delay.h>
+
 
 void shift_init() {
-    DDRB |= (1<<4);
-    DDRB |= (1<<3);
+    SHIFT_DDR |= (1<<4);
+    SHIFT_DDR |= (1<<3);
 
     shift_byte(0);
 }
 
 void shift_bit(uint8_t v) {
     if(v & 0b00000001) {
-        PORTB |= (1<<PB3);
+        SHIFT_PORT |= (1<<SHIFT_PDATA);
     } else {
-        PORTB &= ~(1<<PB3);
+        SHIFT_PORT &= ~(1<<SHIFT_PDATA);
     }
-    PORTB |= (1<<PB4);
-    PORTB &= ~(1<<PB4);
+    SHIFT_PORT |= (1<<SHIFT_PCLOCK);
+    _delay_ms(10);
+    SHIFT_PORT &= ~(1<<SHIFT_PCLOCK);
+    SHIFT_PORT &= ~(1<<SHIFT_PDATA);
 }
 
 void shift_byte(uint8_t v) {

@@ -3,8 +3,8 @@
 
 void adc_init() {
     // DDRC  = 0x00; // DDRC.1  = 0 = input 
-    DDRC &= ~(1<<5);
-    PORTC = 0xFF; // PORTC.1 = 1 = internal pullup enabled
+    ADC_DDR &= ~(1<<5);
+    ADC_PORT = 0xFF; // PORTC.1 = 1 = internal pullup enabled
 
     // die Versorgungsspannung AVcc als Referenz wählen:
     ADMUX = (1<<REFS0);    
