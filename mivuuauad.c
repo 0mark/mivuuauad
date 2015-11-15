@@ -5,7 +5,7 @@
 #include <avr/interrupt.h>
 #include "uart.h"
 #include "adc.h"
-#include "shift.h"
+// #include "shift.h"
 //#include "irmp/irmp.h"
 
 #define CMDSIZE 4
@@ -24,15 +24,23 @@
 #define BTN_PREV 2
 #define BTN_PLAYSE 3
 #define BTN_NEXT 1
-#define LED_AMP 5
-#define LED_SPK 7
-#define LED_WAIT 6
-#define LED_PLAY 4
 
 // ** Relays
 #define RELAY_PORT PORTB
 #define RELAY_DDR DDRB
 #define RELAY_P PB0
+
+// ** LEDS
+// #define LED_AMP 5
+// #define LED_SPK 7
+// #define LED_WAIT 6
+// #define LED_PLAY 4
+#define LED_PORT PORTB
+#define LED_DDR DDRB
+#define LED_AMP PB5
+#define LED_SPK PB3
+#define LED_WAIT PB4
+#define LED_PLAY PB2
 
 // ** States
 enum { AS_OFF, AS_ON, AS_WAIT_OFF, AS_WAIT4CHARGE, AS_AMP_ON, AS_SPEAKER_WAIT };
@@ -75,12 +83,12 @@ int main (void) {
     uint16_t button_timer = 0;
     uint8_t button = 0, button_last = 0, last_pressed = 0, pot = 0;//, a, b, c, d;
     // ** leds
-    uint8_t leds = 0b00000000, old_leds = 0b00000000;
+    // uint8_t leds = 0b00000000, old_leds = 0b00000000;
 
     // ** init stuff
     uart_init();
     adc_init();
-    shift_init();
+    // shift_init();
     timer_init();
 
     // ** all leds off
@@ -91,6 +99,16 @@ int main (void) {
     RELAY_DDR |= (1<<(RELAY_P+1));
     RELAY_PORT |= (1<<RELAY_P);
     RELAY_PORT |= (1<<(RELAY_P+1));
+
+    // ** init leds (switched off)
+    LED_DDR |= (1<<LED_SPK);
+    LED_DDR |= (1<<LED_WAIT);
+    LED_DDR |= (1<<LED_AMP);
+    LED_DDR |= (1<<LED_PLAY);
+    LED_PORT &= ~(1<<LED_SPK);
+    LED_PORT &= ~(1<<LED_WAIT);
+    LED_PORT &= ~(1<<LED_AMP);
+    LED_PORT &= ~(1<<LED_PLAY);
 
     // ** ready!
     uart_puts("\n\rready\n\r");
@@ -107,9 +125,11 @@ int main (void) {
                 case 'a': goto handle_amp;
                 case 'p':
                     if(cmd[1]=='0')
-                        leds &= ~(1 << LED_PLAY); // PLAY LED OFF
+                        // leds &= ~(1 << LED_PLAY); // PLAY LED OFF
+                        LED_PORT &= ~(1<<LED_PLAY);
                     else if(cmd[1]=='1')
-                        leds |= 1 << LED_PLAY; // PLAY LED ON
+                        // leds |= 1 << LED_PLAY; // PLAY LED ON
+                        LED_PORT |= (1<<LED_PLAY);
                     break;
                 case 'i':
                     uart_putc(amp_state + '0');
@@ -178,42 +198,57 @@ int main (void) {
                     uart_puts("off\n\r");
                     RELAY_PORT |= 1<<(RELAY_P + 0); // AMP off if on
                     RELAY_PORT |= 1<<(RELAY_P + 1); // SPEAKER off if on
-                    leds &= ~(1 << LED_AMP); // AMP LED OFF
-                    leds &= ~(1 << LED_WAIT); // WAIT LED OFF
-                    leds &= ~(1 << LED_SPK); // SPEAKER LED OFF
+                    // leds &= ~(1 << LED_AMP); // AMP LED OFF
+                    // leds &= ~(1 << LED_WAIT); // WAIT LED OFF
+                    // leds &= ~(1 << LED_SPK); // SPEAKER LED OFF
+                    LED_PORT &= ~(1<<LED_AMP);
+                    LED_PORT &= ~(1<<LED_SPK);
+                    LED_PORT &= ~(1<<LED_WAIT);
                     break;
                 case AS_WAIT4CHARGE:
                     uart_puts("wait\n\r");
                     RELAY_PORT &= ~(1<<(RELAY_P + 0)); // AMP on if off
                     RELAY_PORT |= 1<<(RELAY_P + 1); // SPEAKER off if on
-                    leds |= 1 << LED_AMP; // AMP LED ON
-                    leds |= 1 << LED_WAIT; // WAIT LED ON
-                    leds &= ~(1 << LED_SPK); // SPEAKER LED OFF
+                    // leds |= 1 << LED_AMP; // AMP LED ON
+                    // leds |= 1 << LED_WAIT; // WAIT LED ON
+                    // leds &= ~(1 << LED_SPK); // SPEAKER LED OFF
+                    LED_PORT |= (1<<LED_AMP);
+                    LED_PORT |= (1<<LED_WAIT);
+                    LED_PORT &= ~(1<<LED_SPK);
                     break;
                 case AS_AMP_ON:
                     uart_puts("amp\n\r");
                     RELAY_PORT &= ~(1<<(RELAY_P + 0)); // AMP on if off
                     RELAY_PORT |= 1<<(RELAY_P + 1); // SPEAKER off if on
-                    leds |= 1 << LED_AMP; // AMP LED ON
-                    leds &= ~(1 << LED_WAIT); // WAIT LED OFF
-                    leds &= ~(1 << LED_SPK); // SPEAKER LED OFF
+                    // leds |= 1 << LED_AMP; // AMP LED ON
+                    // leds &= ~(1 << LED_WAIT); // WAIT LED OFF
+                    // leds &= ~(1 << LED_SPK); // SPEAKER LED OFF
                     //charge = CHARGED;
+                    LED_PORT |= (1<<LED_AMP);
+                    LED_PORT &= ~(1<<LED_SPK);
+                    LED_PORT &= ~(1<<LED_SPK);
                     break;
                 case AS_ON:
                     uart_puts("on\n\r");
                     RELAY_PORT &= ~(1<<(RELAY_P + 0)); // AMP on if off
                     RELAY_PORT &= ~(1<<(RELAY_P + 1)); // SPEAKER on if off
-                    leds |= 1 << LED_AMP; // AMP LED ON
-                    leds &= ~(1 << LED_WAIT); // WAIT LED OFF
-                    leds |= 1 << LED_SPK; // SPEAKER LED ON
+                    // leds |= 1 << LED_AMP; // AMP LED ON
+                    // leds &= ~(1 << LED_WAIT); // WAIT LED OFF
+                    // leds |= 1 << LED_SPK; // SPEAKER LED ON
+                    LED_PORT |= (1<<LED_AMP);
+                    LED_PORT &= ~(1<<LED_WAIT);
+                    LED_PORT |= (1<<LED_SPK);
                     break;
                 case AS_WAIT_OFF:
                     uart_puts("offwait\n\r");
                     RELAY_PORT &= ~(1<<(RELAY_P + 0)); // AMP on if off
                     RELAY_PORT |= 1<<(RELAY_P + 1); // SPEAKER off if on
-                    leds |= 1 << LED_AMP; // AMP LED ON
-                    leds |= 1 << LED_WAIT; // WAIT LED ON
-                    leds |= 1 << LED_SPK; // SPEAKER LED ON
+                    // leds |= 1 << LED_AMP; // AMP LED ON
+                    // leds |= 1 << LED_WAIT; // WAIT LED ON
+                    // leds |= 1 << LED_SPK; // SPEAKER LED ON
+                    LED_PORT |= (1<<LED_AMP);
+                    LED_PORT |= (1<<LED_WAIT);
+                    LED_PORT |= (1<<LED_SPK);
                     break;
             }
             old_state = amp_state;
@@ -261,22 +296,6 @@ int main (void) {
         // shift_byte(leds);
         // _delay_ms(100);
 
-        shift_byte(0b10000000);
-        _delay_ms(100);
-        shift_byte(0b01000000);
-        _delay_ms(100);
-        shift_byte(0b00100000);
-        _delay_ms(100);
-        shift_byte(0b00010000);
-        _delay_ms(100);
-        shift_byte(0b00001000);
-        _delay_ms(100);
-        shift_byte(0b00000100);
-        _delay_ms(100);
-        shift_byte(0b00000010);
-        _delay_ms(100);
-        shift_byte(0b00000001);
-        _delay_ms(100);
 
     }
 

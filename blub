@@ -1,0 +1,44 @@
+void            on_AddObject_clicked(gpointer user_data)                                                                                                                          
+{                                                                                                                                                                                 
+  t_gtk         *gtk;                                                                                                                                                             
+  gint          response;                                                                                                                                                         
+
+  gtk = (t_gtk *)user_data;                                                                                                                                                       
+  printf("I'm here\n");                                                                                                                                                           
+  response = gtk_dialog_run(GTK_DIALOG(gtk->AddObject));                                                                                                                          
+  printf("I'm here2\n");                                                                                                                                                          
+  if (response == 1)                                                                                                                                                              
+    {                                                                                                                                                                             
+      printf("Add pressed!\n");                                                                                                                                                   
+    }                                                                                                                                                                             
+  else                                                                                                                                                                            
+    {                                                                                                                                                                             
+      printf("Cancel pressed!\n");                                                                                                                                                
+    }                                                                                                                                                                             
+  gtk_widget_hide(gtk->AddObject);                                                                                                                                                
+}
+
+
+
+
+
+void            on_AddObject_clicked(GtkButton *button, gpointer user_data)                                                                                                                          
+{                                                                                                                                                                                 
+  t_gtk         *gtk;                                                                                                                                                             
+  gint          response;                                                                                                                                                         
+
+  gtk = (t_gtk *)user_data;  
+  (void) button;                                                                                                                                           
+  printf("I'm here\n");                                                                                                                                                           
+  response = gtk_dialog_run(GTK_DIALOG(gtk->AddObject));                                                                                                                          
+  printf("I'm here2\n");                                                                                                                                                          
+  if (response == 1)                                                                                                                                                              
+    {                                                                                                                                                                             
+      printf("Add pressed!\n");                                                                                                                                                   
+    }                                                                                                                                                                             
+  else                                                                                                                                                                            
+    {                                                                                                                                                                             
+      printf("Cancel pressed!\n");                                                                                                                                                
+    }                                                                                                                                                                             
+  gtk_widget_hide(gtk->AddObject);                                                                                                                                                
+}

@@ -2,7 +2,8 @@
 #fuse settings are hard-coded into the bottom lines; change them only with care.
 
 PRG            = mivuuauad
-SRC            = uart.c adc.c shift.c mivuuauad.c
+#SRC            = uart.c adc.c shift.c mivuuauad.c
+SRC            = uart.c shift.c mivuuauad.c
 OBJ            = ${SRC:.c=.o}
 MCU_TARGET     = atmega8
 PROGRAMMER     = usbasp
