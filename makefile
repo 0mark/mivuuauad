@@ -3,7 +3,7 @@
 
 PRG            = mivuuauad
 #SRC            = uart.c adc.c shift.c mivuuauad.c
-SRC            = uart.c shift.c mivuuauad.c
+SRC            = uart.c adc.c mivuuauad.c
 OBJ            = ${SRC:.c=.o}
 MCU_TARGET     = atmega8
 PROGRAMMER     = usbasp

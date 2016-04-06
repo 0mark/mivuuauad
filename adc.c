@@ -2,9 +2,9 @@
 #include "adc.h"
 
 void adc_init() {
-    // DDRC  = 0x00; // DDRC.1  = 0 = input 
-    ADC_DDR &= ~(1<<5);
-    ADC_PORT = 0xFF; // PORTC.1 = 1 = internal pullup enabled
+    // // DDRC  = 0x00; // DDRC.1  = 0 = input 
+    // ADC_DDR &= ~(1<<5);
+    // ADC_PORT = 0xFF; // PORTC.1 = 1 = internal pullup enabled
 
     // die Versorgungsspannung AVcc als Referenz wählen:
     ADMUX = (1<<REFS0);    
@@ -30,4 +30,14 @@ uint16_t adc_read(uint8_t channel) {
     ADCSRA |= (1<<ADSC);            // eine Wandlung "single conversion"
     while(ADCSRA & (1<<ADSC)) {}
     return ADCW;                    // ADC auslesen und zurückgeben
+}
+
+uint16_t adc_read_avg(uint8_t channel, uint8_t nsamples) {
+    uint32_t sum = 0;
+
+    for(uint8_t i = 0; i < nsamples; ++i) {
+        sum += adc_read(channel);
+    }
+
+    return(uint16_t)(sum / nsamples);
 }
